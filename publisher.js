@@ -1,5 +1,6 @@
 const amqp = require('amqplib');
 
+// systemctl start rabbitmq-server
 async function publish() {
     const conn = await amqp.connect('amqp://localhost');
     const channel = await conn.createChannel();

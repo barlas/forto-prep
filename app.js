@@ -1,6 +1,8 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const User = require('./models/User'); // Ensure the path is correct
+const User = require('./models/User');
+
+// systemctl start mongod
 
 const app = express();
 app.use(express.json());
