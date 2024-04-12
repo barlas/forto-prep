@@ -1,6 +1,5 @@
-const amqp = require('amqplib');
+import amqp from "amqplib";
 
-// systemctl start rabbitmq-server
 async function publish() {
     const conn = await amqp.connect('amqp://localhost');
     const channel = await conn.createChannel();
@@ -14,8 +13,12 @@ async function publish() {
 
     setTimeout(() => {
         conn.close();
-        process.exit(0);
     }, 500);
 }
 
-publish().catch(console.warn);
+// Use import.meta to determine if the script is run directly
+if (import.meta.url === `file://${process.argv[1]}`) {
+    publish().catch(error => console.error("Error in publisher:", error));
+}
+
+export { publish };

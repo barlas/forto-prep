@@ -1,6 +1,6 @@
-const express = require('express');
-const mongoose = require('mongoose');
-const User = require('./models/User');
+import express from 'express';
+import mongoose from 'mongoose';
+import User from './models/User.js';
 
 // systemctl start mongod
 
@@ -44,3 +44,5 @@ app.get('/users', async (req, res) => {
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
+
+export default app;

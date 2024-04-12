@@ -1,7 +1,6 @@
-const amqp = require('amqplib');
+import amqp from "amqplib";
 
-// systemctl start rabbitmq-server
-async function consume() {
+async function consume(onMessage) {
     const conn = await amqp.connect('amqp://localhost');
     const channel = await conn.createChannel();
     const queue = 'tasks';
@@ -9,11 +8,16 @@ async function consume() {
     await channel.assertQueue(queue, { durable: false });
     console.log(" [*] Waiting for messages in %s. To exit press CTRL+C", queue);
     
-    channel.consume(queue, function(msg) {
-        console.log(" [x] Received %s", msg.content.toString());
+    channel.consume(queue, (msg) => {
+        onMessage(msg.content.toString());
     }, {
         noAck: true
     });
 }
 
-consume().catch(console.warn);
+// Use import.meta to determine if the script is run directly
+if (import.meta.url === `file://${process.argv[1]}`) {
+    consume(message => console.log("Received:", message));
+}
+
+export { consume };
