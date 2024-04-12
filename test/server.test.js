@@ -1,11 +1,11 @@
-import chai from 'chai';
-const expect = chai.expect;
+import { expect } from 'chai';
 import request from 'supertest';
 import sinon from 'sinon';
 import mongoose from 'mongoose';
 import User from '../models/User.js';
 import app from '../app.js';
-import { mockgoose } from 'mockgoose';
+import pkg from 'mockgoose';
+const { mockgoose } = pkg;
 
 describe('API tests', function() {
     before(async function() {
