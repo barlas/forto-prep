@@ -68,6 +68,7 @@ server.post('/trigger-publish', async (req, res) => {
 });
 
 // Express Handler for RPC
+// curl -X POST http://localhost:3000/trigger-rpc -H "Content-Type: application/json" -d '{"num": 1}'
 server.post('/trigger-rpc', async (req, res) => {
     try {
         const num = parseInt(req.body.num, 10);
