@@ -1,9 +1,9 @@
-import { expect } from 'chai';
-import { describe, it, beforeEach, afterEach } from 'mocha';
-import sinon from 'sinon';
 import amqp from 'amqplib';
-import { publish } from '../publisher.js';
+import { expect } from 'chai';
+import { afterEach, beforeEach, describe, it } from 'mocha';
+import sinon from 'sinon';
 import { consume } from '../consumer.js';
+import { publish } from '../publisher.js';
 
 describe('RabbitMQ Publisher and Consumer Tests', function() {
     let createChannelStub, connectStub, channelStub;
