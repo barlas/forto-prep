@@ -2,6 +2,7 @@ import express from 'express';
 import mongoose from 'mongoose';
 import User from './models/User.js';
 import { publish } from './publisher.js';
+import { publishRPC } from './message.js';
 
 const server = express();
 server.use(express.json());
@@ -48,6 +49,21 @@ server.post('/trigger-publish', async (req, res) => {
         res.status(200).send('Message published successfully');
     } catch (error) {
         res.status(500).send('Failed to publish message');
+    }
+});
+
+server.post('/trigger-rpc', async (req, res) => {
+    try {
+        const num = parseInt(req.body.num, 10);
+        console.log("Received number:", num);
+        if (isNaN(num)) {
+            return res.status(400).send({ error: 'Provided number is invalid' });
+        }
+        await publishRPC(num);
+        res.status(200).send('RPC request sent successfully.');
+    } catch (error) {
+        console.error('Error in RPC request:', error);
+        res.status(500).send('Failed to process RPC request');
     }
 });
 
