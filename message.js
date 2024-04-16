@@ -1,6 +1,7 @@
 import amqp from 'amqplib';
 
-export async function publishRPC(num) {  // Accept `num` as a parameter
+// Publisher RPC Function
+export async function publishRPC(num) {
     const conn = await amqp.connect('amqp://localhost');
     const channel = await conn.createChannel();
     const requestQueue = 'rpc_queue';
@@ -8,20 +9,21 @@ export async function publishRPC(num) {  // Accept `num` as a parameter
 
     const correlationId = generateUuid();
 
-    console.log(`[x] Requesting fib(${num})`);  // Log the number passed to the function
+    console.log(`[x] Requesting processing for number ${num}`);
 
-    channel.consume(replyQueue.queue, (msg) => {
-        if (msg.properties.correlationId === correlationId) {
-            console.log('[.] Got %s', msg.content.toString());
-            setTimeout(() => {
-                conn.close();  // No need to exit process here
-            }, 500);
-        }
-    }, { noAck: true });
+    return new Promise((resolve, reject) => {
+        channel.consume(replyQueue.queue, (msg) => {
+            if (msg.properties.correlationId === correlationId) {
+                console.log('[.] Got response:', msg.content.toString());
+                resolve(msg.content.toString());
+                conn.close();
+            }
+        }, { noAck: true });
 
-    channel.sendToQueue(requestQueue,
-        Buffer.from(num.toString()),
-        { correlationId: correlationId, replyTo: replyQueue.queue });
+        channel.sendToQueue(requestQueue,
+            Buffer.from(num.toString()),
+            { correlationId: correlationId, replyTo: replyQueue.queue });
+    });
 }
 
 function generateUuid() {
@@ -32,23 +34,29 @@ function generateUuid() {
 
 let shouldContinue = true;  // Flag to control the lifecycle of the consumer
 
+// Consumer Function
 export async function startConsumer() {
     const conn = await amqp.connect('amqp://localhost');
     const channel = await conn.createChannel();
-    await channel.assertQueue('rpc_queue', { durable: false });
+    const queue = 'rpc_queue';
 
-    channel.prefetch(1);
-    console.log(' [x] Awaiting RPC requests');
-    const consumerTag = await channel.consume('rpc_queue', (msg) => {
-        // Process message...
-        if (!shouldContinue) {
-            channel.ack(msg);
-            channel.cancel(consumerTag);  // Cancel this consumer
-        }
+    await channel.assertQueue(queue, { durable: false });
+    console.log('[x] Awaiting RPC requests');
+    channel.consume(queue, (msg) => {
+        const num = parseInt(msg.content.toString(), 10);
+        const result = num * 2;  // Dummy processing, e.g., double the number
+
+        console.log(`[.] Processing number: ${num} to ${result}`);
+        
+        // Send response back
+        channel.sendToQueue(msg.properties.replyTo,
+            Buffer.from(result.toString()), 
+            { correlationId: msg.properties.correlationId });
+
+        channel.ack(msg);
     });
-
-    return { channel, conn, consumerTag };  // Return these for potential cleanup
 }
+
 
 // Set up a way to stop the consumer
 export function stopConsumer(consumerInfo) {
