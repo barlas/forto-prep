@@ -1,13 +1,12 @@
-import amqp from "amqplib";
+import amqp from 'amqplib';
 
-async function publish() {
+export async function publish() {
     const conn = await amqp.connect('amqp://localhost');
     const channel = await conn.createChannel();
     const queue = 'tasks';
 
     await channel.assertQueue(queue, { durable: false });
-    const message = 'Hello RabbitMQ Barlas!';
-
+    const message = 'Hello RabbitMQ! Barlas!!!';
     channel.sendToQueue(queue, Buffer.from(message));
     console.log(" [x] Sent '%s'", message);
 
@@ -20,5 +19,3 @@ async function publish() {
 if (import.meta.url === `file://${process.argv[1]}`) {
     publish().catch(error => console.error("Error in publisher:", error));
 }
-
-export { publish };

@@ -1,6 +1,6 @@
 import amqp from "amqplib";
 
-async function consume(onMessage) {
+export async function consume(onMessage) {
     const conn = await amqp.connect('amqp://localhost');
     const channel = await conn.createChannel();
     const queue = 'tasks';
@@ -19,5 +19,3 @@ async function consume(onMessage) {
 if (import.meta.url === `file://${process.argv[1]}`) {
     consume(message => console.log("Received:", message));
 }
-
-export { consume };

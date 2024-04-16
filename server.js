@@ -2,26 +2,26 @@ import express from 'express';
 import mongoose from 'mongoose';
 import User from './models/User.js';
 
-// systemctl start mongod
-
-const app = express();
-app.use(express.json());
+const server = express();
+server.use(express.json());
 
 const PORT = process.env.PORT || 3000;
 
-mongoose.connect('mongodb://localhost:27017/mydatabase', {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-})
-.then(() => console.log('MongoDB connected'))
-.catch(err => console.error('MongoDB connection error:', err));
+// Connect to MongoDB only if not in test environment
+if (process.env.TEST_ENVIRONMENT !== 'true') {
+    mongoose.connect('mongodb://localhost:27017/mydatabase', {
+        useNewUrlParser: true,
+        useUnifiedTopology: true
+    })
+    .then(() => console.log('MongoDB connected'))
+    .catch(err => console.error('MongoDB connection error:', err));
+}
 
-app.get('/', (req, res) => {
+server.get('/', (req, res) => {
     res.send('Hello World!');
 });
 
-// POST route to create a new user
-app.post('/users', async (req, res) => {
+server.post('/users', async (req, res) => {
     const newUser = new User(req.body);
     try {
         const savedUser = await newUser.save();
@@ -31,8 +31,7 @@ app.post('/users', async (req, res) => {
     }
 });
 
-// GET route to fetch all users
-app.get('/users', async (req, res) => {
+server.get('/users', async (req, res) => {
     try {
         const users = await User.find();
         res.status(200).send(users);
@@ -41,8 +40,10 @@ app.get('/users', async (req, res) => {
     }
 });
 
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-});
+if (process.env.TEST_ENVIRONMENT !== 'true') {
+    server.listen(PORT, () => {
+        console.log(`Server running on port ${PORT}`);
+    });
+}
 
-export default app;
+export default server;
