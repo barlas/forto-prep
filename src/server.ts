@@ -1,7 +1,7 @@
 import amqp from 'amqplib';
 import express, { Request, Response } from 'express';
 import mongoose from 'mongoose';
-import { publishRPC, startConsumer, stopConsumer } from './message.js';
+import { publish, startConsumer, stopConsumer } from './message.js';
 import User from './models/User.js';
 
 const server = express();
@@ -21,7 +21,6 @@ async function initializeConsumer(): Promise<void> {
     const result = await startConsumer();
     if (result) {
       consumerInfo = result;
-      console.log('Consumer started successfully');
     } else {
       console.error('No consumer info returned');
     }
@@ -76,15 +75,15 @@ server.get('/users', async (req: Request, res: Response) => {
   }
 });
 
-// curl -X POST http://localhost:3000/trigger-rpc -H "Content-Type: application/json" -d '{"num": 1}'
-server.post('/trigger-rpc', async (req: Request, res: Response) => {
+// curl -X POST http://localhost:3000/DoublingNumber -H "Content-Type: application/json" -d '{"num": 5}'
+server.post('/DoublingNumber', async (req: Request, res: Response) => {
   try {
     const num = parseInt(req.body.num, 10);
     if (isNaN(num)) {
       return res.status(400).send({ error: 'Provided number is invalid' });
     }
 
-    const result = await publishRPC(num);
+    const result = await publish(num);
     res.status(200).send(`RPC request processed successfully, result: ${result}`);
   } catch (error) {
     console.error('Error in RPC request:', error);

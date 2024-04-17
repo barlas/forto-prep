@@ -1,7 +1,7 @@
 import express from 'express';
 import mongoose from 'mongoose';
+import { publish, startConsumer, stopConsumer } from './message.js';
 import User from './models/User.js';
-import { publishRPC, startConsumer, stopConsumer } from './message.js';
 const server = express();
 server.use(express.json());
 const PORT = process.env.PORT || 3000;
@@ -11,7 +11,6 @@ async function initializeConsumer() {
         const result = await startConsumer();
         if (result) {
             consumerInfo = result;
-            console.log('Consumer started successfully');
         }
         else {
             console.error('No consumer info returned');
@@ -66,14 +65,14 @@ server.get('/users', async (req, res) => {
         res.status(500).send(error);
     }
 });
-// curl -X POST http://localhost:3000/trigger-rpc -H "Content-Type: application/json" -d '{"num": 1}'
-server.post('/trigger-rpc', async (req, res) => {
+// curl -X POST http://localhost:3000/DoublingNumber -H "Content-Type: application/json" -d '{"num": 5}'
+server.post('/DoublingNumber', async (req, res) => {
     try {
         const num = parseInt(req.body.num, 10);
         if (isNaN(num)) {
             return res.status(400).send({ error: 'Provided number is invalid' });
         }
-        const result = await publishRPC(num);
+        const result = await publish(num);
         res.status(200).send(`RPC request processed successfully, result: ${result}`);
     }
     catch (error) {

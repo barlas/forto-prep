@@ -1,7 +1,7 @@
 import amqp from 'amqplib';
 import { expect } from 'chai';
 import sinon from 'sinon';
-import { publishRPC, startConsumer, stopConsumer } from '../message.js';
+import { publish, startConsumer, stopConsumer } from '../message.js';
 describe('RabbitMQ Messaging Tests', () => {
     let sandbox;
     let connectStub;
@@ -38,7 +38,7 @@ describe('RabbitMQ Messaging Tests', () => {
                     properties: { correlationId: options.correlationId }
                 }));
             });
-            await publishRPC(10);
+            await publish(10);
             sinon.assert.calledOnce(connectStub);
             sinon.assert.calledWith(channelStub.assertQueue, '', { exclusive: true });
             sinon.assert.calledOnce(channelStub.sendToQueue);

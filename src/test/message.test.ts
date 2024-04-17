@@ -1,7 +1,7 @@
 import amqp, { Channel, Connection, ConsumeMessage } from 'amqplib';
 import { expect } from 'chai';
 import sinon, { SinonSandbox, SinonStub } from 'sinon';
-import { publishRPC, startConsumer, stopConsumer } from '../message.js';
+import { publish, startConsumer, stopConsumer } from '../message.js';
 
 describe('RabbitMQ Messaging Tests', () => {
     let sandbox: SinonSandbox;
@@ -58,7 +58,7 @@ describe('RabbitMQ Messaging Tests', () => {
                 } as ConsumeMessage));
             });
         
-            await publishRPC(10);
+            await publish(10);
             sinon.assert.calledOnce(connectStub);
             sinon.assert.calledWith(channelStub.assertQueue, '', { exclusive: true });
             sinon.assert.calledOnce(channelStub.sendToQueue);

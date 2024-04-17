@@ -5,20 +5,20 @@ interface ConsumerInfo {
     connection: Connection;
 }
 
-// Publisher RPC Function
-export async function publishRPC(num: number): Promise<string> {
+// Publisher Function
+export async function publish(num: number): Promise<string> {
     const connection = await amqp.connect('amqp://localhost');
     const channel = await connection.createChannel();
     const assertQueueResult: Replies.AssertQueue = await channel.assertQueue('', { exclusive: true });
     const replyQueue = assertQueueResult.queue;
 
     const correlationId = generateUuid();
-    console.log(`[x] Requesting processing for number ${num}`);
+    console.log(`[.] Puslisher: Requesting processing for number ${num}`);
 
     return new Promise((resolve, reject) => {
         channel.consume(replyQueue, (msg: ConsumeMessage | null) => {
             if (msg && msg.properties.correlationId === correlationId) {
-                console.log('[.] Got response:', msg.content.toString());
+                console.log('[.] Publisher: Got response:', msg.content.toString());
                 resolve(msg.content.toString());
                 connection.close().catch(error => console.error('Failed to close connection', error));
             }
@@ -48,13 +48,13 @@ export async function startConsumer(): Promise<ConsumerInfo> {
     const queue = 'rpc_queue';
 
     await channel.assertQueue(queue, { durable: false });
-    console.log('[x] Awaiting RPC requests');
+    console.log('[x] Consumer: Awaiting requests');
     channel.consume(queue, (msg: ConsumeMessage | null) => {
         if (msg) {
             const num = parseInt(msg.content.toString(), 10);
-            const result = num * 2;  // Example processing: double the number
+            const result = num * 2;
 
-            console.log(`[.] Processing number: ${num} to ${result}`);
+            console.log(`[x] Consumer: Doubling number from ${num} to ${result}`);
 
             channel.sendToQueue(
                 msg.properties.replyTo,
