@@ -2,6 +2,10 @@
 
 A quick TS node server with REST API & Events Queue!
 
+## Improvements?
+
+Note that the RabbitMQ logic could be implemented using serverless architecture instead of being integrated into the Express server.
+
 ## /users (GET, POST)
 
 A placeholder REST endpoint which queries the MongoDB, and returns the users.
