@@ -1,0 +1,108 @@
+import express, { Request, Response } from 'express';
+import mongoose from 'mongoose';
+import User from './models/User.js';
+import { publishRPC, startConsumer, stopConsumer } from './message.js';
+import amqp from 'amqplib'; // Import only if actually using amqp.Channel and amqp.Connection
+
+const server = express();
+server.use(express.json());
+
+const PORT = process.env.PORT || 3000;
+
+interface ConsumerInfo {
+    channel: amqp.Channel;   // Correct types if using amqp
+    connection: amqp.Connection; // Correct types if using amqp
+}
+
+let consumerInfo: ConsumerInfo | null = null;
+
+async function initializeConsumer(): Promise<void> {
+  try {
+    const result = await startConsumer();
+    if (result) {
+      consumerInfo = result;
+      console.log('Consumer started successfully');
+    } else {
+      console.error('No consumer info returned');
+    }
+  } catch (error) {
+    console.error('Failed to start consumer:', error);
+  }
+}
+
+const connectToMongoDB = async () => {
+  try {
+    await mongoose.connect('mongodb://localhost:27017/mydatabase');
+    console.log('MongoDB connected');
+  } catch (err) {
+    console.error('MongoDB connection error:', err);
+    throw err;
+  }
+};
+
+const startServer = async () => {
+  try {
+    await connectToMongoDB();
+    server.listen(PORT, async () => {
+      console.log(`Server running on port ${PORT}`);
+      await initializeConsumer();
+    });
+  } catch (error) {
+    console.error('Failed to start server:', error);
+  }
+};
+
+server.get('/', (req: Request, res: Response) => {
+  res.send('Hello World!');
+});
+
+server.post('/users', async (req: Request, res: Response) => {
+  const newUser = new User(req.body);
+  try {
+    const savedUser = await newUser.save();
+    res.status(201).send(savedUser);
+  } catch (error) {
+    res.status(400).send(error);
+  }
+});
+
+// curl -X POST http://localhost:3000/users -H "Content-Type: application/json" -d '{"name":"Barlas", "age":30}'
+server.get('/users', async (req: Request, res: Response) => {
+  try {
+    const users = await User.find();
+    res.status(200).send(users);
+  } catch (error) {
+    res.status(500).send(error);
+  }
+});
+
+// curl -X POST http://localhost:3000/trigger-rpc -H "Content-Type: application/json" -d '{"num": 1}'
+server.post('/trigger-rpc', async (req: Request, res: Response) => {
+  try {
+    const num = parseInt(req.body.num, 10);
+    if (isNaN(num)) {
+      return res.status(400).send({ error: 'Provided number is invalid' });
+    }
+
+    const result = await publishRPC(num);
+    res.status(200).send(`RPC request processed successfully, result: ${result}`);
+  } catch (error) {
+    console.error('Error in RPC request:', error);
+    res.status(500).send('Failed to process RPC request');
+  }
+});
+
+process.on('SIGINT', async () => {
+  console.log('Shutting down server...');
+  if (consumerInfo) {
+    await stopConsumer(consumerInfo);
+    console.log('Consumer stopped successfully');
+  }
+  process.exit(0);
+});
+
+if (process.env.TEST_ENVIRONMENT !== 'true') {
+  startServer();
+}
+
+export default server;

@@ -5,27 +5,25 @@ import sinon from 'sinon';
 import request from 'supertest';
 import server from '../server.js';
 
-let mongoServer;
+let mongoServer: MongoMemoryServer;
 
-before(async function() {
-    // Start the in-memory MongoDB instance
+before(async () => {
     mongoServer = await MongoMemoryServer.create();
     const mongoUri = mongoServer.getUri();
     await mongoose.connect(mongoUri);
 });
 
-after(async function() {
+after(async () => {
     await mongoose.disconnect();
     await mongoServer.stop();
 });
 
-
-describe('API tests', function() {
-    afterEach(function() {
-        sinon.restore(); // Reset all stubs
+describe('API tests', () => {
+    afterEach(() => {
+        sinon.restore();
     });
 
-    it('should return Hello World', function(done) {
+    it('should return Hello World', (done) => {
         request(server)
             .get('/')
             .expect(200)
@@ -35,7 +33,7 @@ describe('API tests', function() {
             });
     });
 
-    it('should create a new user', function(done) {
+    it('should create a new user', (done) => {
         const userData = { name: 'John Doe', age: 30 };
 
         request(server)
@@ -49,7 +47,7 @@ describe('API tests', function() {
             });
     });
 
-    it('should fetch all users', function(done) {
+    it('should fetch all users', (done) => {
         request(server)
             .get('/users')
             .expect(200)
