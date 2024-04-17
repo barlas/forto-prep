@@ -1,7 +1,7 @@
 {
   "name": "forto-prep",
   "version": "1.0.0",
-  "description": "",
+  "description": "A quick TS node server with REST API & Events Queue!",
   "main": "src/server.ts",
   "type": "module",
   "scripts": {
