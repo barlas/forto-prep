@@ -7,11 +7,11 @@ describe('RabbitMQ Messaging Tests', () => {
     let connectStub;
     let channelStub;
     let connectionStub;
-    let consumerInfo; // Define the type based on what startConsumer returns
+    let consumerInfo;
     beforeEach(() => {
         sandbox = sinon.createSandbox();
         channelStub = {
-            assertQueue: sandbox.stub().resolves({ queue: 'rpc_reply_queue' }),
+            assertQueue: sandbox.stub().resolves({ queue: 'reply_queue' }),
             consume: sandbox.stub(),
             sendToQueue: sandbox.stub(),
             close: sandbox.stub(),
@@ -30,8 +30,8 @@ describe('RabbitMQ Messaging Tests', () => {
         }
         sandbox.restore();
     });
-    describe('Publishing RPC', () => {
-        it('should initiate RPC request correctly', async () => {
+    describe('Publishing', () => {
+        it('should initiate request correctly', async () => {
             channelStub.sendToQueue.callsFake((queue, content, options) => {
                 setImmediate(() => channelStub.consume.firstCall.args[1]({
                     content: Buffer.from('Processed: 20'),
@@ -42,7 +42,7 @@ describe('RabbitMQ Messaging Tests', () => {
             sinon.assert.calledOnce(connectStub);
             sinon.assert.calledWith(channelStub.assertQueue, '', { exclusive: true });
             sinon.assert.calledOnce(channelStub.sendToQueue);
-            expect(channelStub.sendToQueue.calledWith(sinon.match.string, sinon.match.any, sinon.match.has('replyTo', 'rpc_reply_queue'))).to.be.true;
+            expect(channelStub.sendToQueue.calledWith(sinon.match.string, sinon.match.any, sinon.match.has('replyTo', 'reply_queue'))).to.be.true;
         });
     });
     describe('Consuming Messages', () => {
@@ -57,24 +57,21 @@ describe('RabbitMQ Messaging Tests', () => {
                         deliveryMode: 1,
                         correlationId: '12345',
                         replyTo: 'reply_queue',
-                        priority: 0, // Example value, adjust as needed
-                        expiration: '', // Example value, adjust as needed
-                        messageId: '', // Example value, adjust as needed
-                        timestamp: 0, // Example value, adjust as needed
-                        type: '', // Example value, adjust as needed
-                        userId: '', // Example value, adjust as needed
-                        appId: '', // Example value, adjust as needed
-                        clusterId: '' // Example value, adjust as needed
-                        // Add other necessary properties here
+                        priority: 0,
+                        expiration: '',
+                        messageId: '',
+                        timestamp: 0,
+                        type: '',
+                        userId: '',
+                        appId: '',
+                        clusterId: ''
                     },
                     fields: {
-                        // Add fields related to message delivery
-                        consumerTag: '', // Example value, adjust as needed
-                        deliveryTag: 0, // Example value, adjust as needed
-                        redelivered: false, // Example value, adjust as needed
-                        exchange: '', // Example value, adjust as needed
-                        routingKey: '' // Example value, adjust as needed
-                        // Add other necessary fields here
+                        consumerTag: '',
+                        deliveryTag: 0,
+                        redelivered: false,
+                        exchange: '',
+                        routingKey: ''
                     }
                 };
                 onMessage(msg);

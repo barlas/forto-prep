@@ -15,7 +15,7 @@ export async function publish(num) {
                 connection.close().catch(error => console.error('Failed to close connection', error));
             }
         }, { noAck: true });
-        channel.sendToQueue('rpc_queue', Buffer.from(num.toString()), {
+        channel.sendToQueue('queue', Buffer.from(num.toString()), {
             correlationId: correlationId,
             replyTo: replyQueue
         });
@@ -30,7 +30,7 @@ function generateUuid() {
 export async function startConsumer() {
     const connection = await amqp.connect('amqp://localhost');
     const channel = await connection.createChannel();
-    const queue = 'rpc_queue';
+    const queue = 'queue';
     await channel.assertQueue(queue, { durable: false });
     console.log('[x] Consumer: Awaiting requests');
     channel.consume(queue, (msg) => {

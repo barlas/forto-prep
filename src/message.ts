@@ -25,7 +25,7 @@ export async function publish(num: number): Promise<string> {
         }, { noAck: true });
 
         channel.sendToQueue(
-            'rpc_queue',
+            'queue',
             Buffer.from(num.toString()),
             {
                 correlationId: correlationId,
@@ -45,7 +45,7 @@ function generateUuid(): string {
 export async function startConsumer(): Promise<ConsumerInfo> {
     const connection = await amqp.connect('amqp://localhost');
     const channel = await connection.createChannel();
-    const queue = 'rpc_queue';
+    const queue = 'queue';
 
     await channel.assertQueue(queue, { durable: false });
     console.log('[x] Consumer: Awaiting requests');

@@ -65,8 +65,8 @@ server.get('/users', async (req, res) => {
         res.status(500).send(error);
     }
 });
-// curl -X POST http://localhost:3000/DoublingNumber -H "Content-Type: application/json" -d '{"num": 5}'
-server.post('/DoublingNumber', async (req, res) => {
+// curl -X POST http://localhost:3000/queue -H "Content-Type: application/json" -d '{"num": 5}'
+server.post('/queue', async (req, res) => {
     try {
         const num = parseInt(req.body.num, 10);
         if (isNaN(num)) {
