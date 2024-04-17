@@ -2,13 +2,11 @@
   "name": "forto-prep",
   "version": "1.0.0",
   "description": "",
-  "main": "server.js",
+  "main": "src/server.ts",
   "type": "module",
   "scripts": {
     "build": "tsc",
     "start": "nodemon",
-    "consumer": "node consumer.js",
-    "publisher": "node publisher.js",
     "test": "TEST_ENVIRONMENT=true NODE_OPTIONS='--import ./register.js' mocha --extension ts 'src/**/*.test.ts'"
   },
   "keywords": [],
