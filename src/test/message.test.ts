@@ -1,8 +1,7 @@
-import amqp from 'amqplib';
+import amqp, { Channel, Connection, ConsumeMessage } from 'amqplib';
 import { expect } from 'chai';
 import sinon, { SinonSandbox, SinonStub } from 'sinon';
 import { publishRPC, startConsumer, stopConsumer } from '../message.js';
-import { ConsumeMessage, Connection, Channel, Replies } from 'amqplib'; // Import types for message consumption
 
 describe('RabbitMQ Messaging Tests', () => {
     let sandbox: SinonSandbox;

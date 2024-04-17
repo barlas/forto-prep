@@ -1,8 +1,8 @@
+import amqp from 'amqplib';
 import express, { Request, Response } from 'express';
 import mongoose from 'mongoose';
-import User from './models/User.js';
 import { publishRPC, startConsumer, stopConsumer } from './message.js';
-import amqp from 'amqplib'; // Import only if actually using amqp.Channel and amqp.Connection
+import User from './models/User.js';
 
 const server = express();
 server.use(express.json());
@@ -10,8 +10,8 @@ server.use(express.json());
 const PORT = process.env.PORT || 3000;
 
 interface ConsumerInfo {
-    channel: amqp.Channel;   // Correct types if using amqp
-    connection: amqp.Connection; // Correct types if using amqp
+    channel: amqp.Channel;
+    connection: amqp.Connection;
 }
 
 let consumerInfo: ConsumerInfo | null = null;
